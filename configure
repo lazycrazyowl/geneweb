@@ -165,13 +165,13 @@ testversion() {
 check_os() {
   OS_TYPE=`uname -s`
   if [[ $OS_TYPE == "Darwin" ]] || [[ $OS_TYPE == "Linux" ]] ; then
-    print_check_ok "Checking OS type" "UNIX"
+    print_check_ok "OS type" "UNIX"
     CAMLP5F+=" -D UNIX"
     EXE=
     RM="/bin/rm -f"
     STRIP=strip
   else
-    print_check_ok "Checking OS type" "WINDOWS"
+    print_check_ok "OS type" "WINDOWS"
     OS_TYPE="Win"
     CAMLP5F+=" -D WINDOWS"
     EXE=".exe"
@@ -182,17 +182,17 @@ check_os() {
 
 check_make() {
   if ! make -v >/dev/null 2>&1; then
-    print_check_err "Checking make" "\
+    print_check_err "make" "\
       make needed."
   else
     local MAKE_MIN_VER="GNU Make 3.81"
     local MAKE_VER=`make -v|head -n 1`
     if testversion "$MAKE_VER" ">=" "$MAKE_MIN_VER"; then
       print_check_ok \
-        "Checking make version $MAKE_VER >= $MAKE_MIN_VER"
+        "make version $MAKE_VER >= $MAKE_MIN_VER"
     else
       print_check_warn \
-        "Checking make version $MAKE_VER" \
+        "make version $MAKE_VER" \
         "$MAKE_MIN_VER or compatible needed."
     fi
   fi
@@ -208,18 +208,18 @@ check_ocaml() {
     OCAMLOPT=ocamlopt
   fi
   if $OCAMLC -v >/dev/null 2>&1; then
-    print_check_ok "Checking OCaml compiler ($OCAMLC)"
+    print_check_ok "OCaml compiler ($OCAMLC)"
   else
-    print_check_err "Checking OCaml compiler ($OCAMLC)" \
+    print_check_err "OCaml compiler ($OCAMLC)" \
         "You need the command ocamlc accessible in the path!"
   fi
   if $TRY_NATIVE && $OCAMLOPT -v >/dev/null 2>&1; then
-    print_check_ok "Checking OCaml native compiler ($OCAMLOPT)"
+    print_check_ok "OCaml native compiler ($OCAMLOPT)"
     NATIVE=true
   elif $TRY_NATIVE; then
-    print_check_warn "Checking OCaml native compiler ($OCAMLOPT)" "NOT FOUND"
+    print_check_warn "OCaml native compiler ($OCAMLOPT)" "NOT FOUND"
   else
-    print_check_ok "Checking OCaml native compiler" "SKIPPED"
+    print_check_ok "OCaml native compiler" "SKIPPED"
   fi
 }
 
@@ -229,22 +229,22 @@ check_optimized_ocaml() {
     local TRYOCAMLC=ocamlc.opt
     local TRYOCAMLOPT=ocamlopt.opt
     if $TRYOCAMLC -v >/dev/null 2>&1; then
-      print_check_ok "Checking OCaml optimized compiler ($TRYOCAMLC)"
+      print_check_ok "OCaml optimized compiler ($TRYOCAMLC)"
       OCAMLC=$TRYOCAMLC
     else
-      print_check_warn "Checking OCaml optimized compiler ($TRYOCAMLC)" "NOT FOUND"
+      print_check_warn "OCaml optimized compiler ($TRYOCAMLC)" "NOT FOUND"
     fi
     if $TRY_NATIVE && $TRYOCAMLOPT -v >/dev/null 2>&1; then
-      print_check_ok "Checking OCaml optimized native compiler ($TRYOCAMLOPT)"
+      print_check_ok "OCaml optimized native compiler ($TRYOCAMLOPT)"
       OCAMLOPT=$TRYOCAMLOPT
       NATIVE=true
     elif $TRY_NATIVE; then
-      print_check_warn "Checking OCaml optimized native compiler ($TRYOCAMLOPT)" "NOT FOUND"
+      print_check_warn "OCaml optimized native compiler ($TRYOCAMLOPT)" "NOT FOUND"
     else
-      print_check_ok "Checking OCaml optimized native compiler" "SKIPPED"
+      print_check_ok "OCaml optimized native compiler" "SKIPPED"
     fi
   else
-    print_check_ok "Check OCaml optimized compilers" "SKIPPED"
+    print_check_ok "OCaml optimized compilers" "SKIPPED"
   fi
 }
 
@@ -254,18 +254,18 @@ check_ocaml_version() {
   local OCAML_VER="`$OCAMLC -version`"
   if testversion "$OCAML_VER" ">=" "$OCAML_MIN_VER"; then
     print_check_ok \
-      "Checking OCaml compiler version $OCAML_VER >= $OCAML_MIN_VER"
+      "OCaml compiler version $OCAML_VER >= $OCAML_MIN_VER"
   else
-    print_check_err "Checking OCaml compiler version $OCAML_VER" \
+    print_check_err "OCaml compiler version $OCAML_VER" \
         "OCaml version $OCAML_MIN_VER or newer needed."
   fi
   if $NATIVE; then
     OCAML_VER="`$OCAMLOPT -version`"
     if testversion "$OCAML_VER" ">=" "$OCAML_MIN_VER"; then
       print_check_ok \
-        "Checking OCaml native compiler version $OCAML_VER >= $OCAML_MIN_VER"
+        "OCaml native compiler version $OCAML_VER >= $OCAML_MIN_VER"
     else
-      print_check_warn "Checking Ocaml compiler version $OCAML_VER" \
+      print_check_warn "Ocaml compiler version $OCAML_VER" \
           "OCaml version $OCAML_MIN_VER or newer needed."
       NATIVE=false
     fi
@@ -274,26 +274,26 @@ check_ocaml_version() {
 
 check_camlp5() {
   if camlp5 -v >/dev/null 2>&1; then
-    print_check_ok "Checking Camlp5"
+    print_check_ok "Camlp5"
     CAMLP5D=`camlp5 -where`
   else
-    print_check_err "Checking Camlp5" \
+    print_check_err "Camlp5" \
         "You need the command camlp5 accessible in the path!"
   fi
 }
 
 check_ocamlfind() {
   if $TRY_OCAMLFIND && ocamlfind printconf >/dev/null 2>&1; then
-    print_check_ok "Checking ocamlfind" "FOUND"
+    print_check_ok "ocamlfind" "FOUND"
     OCAMLFIND=true
     OCAMLFLAGS+=" -linkpkg"
   elif $API; then
-    print_check_err "Checking ocamlfind" \
+    print_check_err "ocamlfind" \
         "You need the command ocamlfind accessible in the path!"
   elif $TRY_OCAMLFIND; then
-    print_check_warn "Checking ocamlfind" "NOT FOUND"
+    print_check_warn "ocamlfind" "NOT FOUND"
   else
-    print_check_ok "Checking ocamlfind" "SKIPPED"
+    print_check_ok "ocamlfind" "SKIPPED"
   fi
 }
 
@@ -320,23 +320,23 @@ check_flags() {
 check_lablgtk2() {
   if $OCAMLFIND; then
     if ocamlfind query lablgtk2 >/dev/null 2>&1; then
-      print_check_ok "Checking OCaml lablgtk2 (only needed to build gui)"
+      print_check_ok "OCaml lablgtk2 (only needed to build gui)"
       LABLGTK2D=`ocamlfind query lablgtk2`
     else
-      print_check_warn "Checking OCaml lablgtk2" "NOT FOUND"
+      print_check_warn "OCaml lablgtk2" "NOT FOUND"
     fi
   else
-    print_check_warn "Checking OCaml lablgtk2" "SKIPPED"
+    print_check_warn "OCaml lablgtk2" "SKIPPED"
   fi
 }
 
 check_curl() {
   if $API; then
     if ocamlfind query curl >/dev/null 2>&1; then
-      print_check_ok "Checking OCaml curl"
+      print_check_ok "OCaml curl"
       CURL=`ocamlfind query curl`
     else
-      print_check_err "Checking OCaml curl" \
+      print_check_err "OCaml curl" \
           "You need the OCaml dependency curl!"
     fi
   fi
@@ -345,10 +345,10 @@ check_curl() {
 check_piqi() {
   if $API; then
     if ocamlfind query piqirun >/dev/null 2>&1; then
-      print_check_ok "Checking OCaml piqi"
+      print_check_ok "OCaml piqi"
       PIQI=`ocamlfind query piqirun`
     else
-      print_check_err "Checking OCaml piqi" \
+      print_check_err "OCaml piqi" \
           "You need the OCaml dependency piqi!"
     fi
   fi
@@ -357,10 +357,10 @@ check_piqi() {
 check_yojson() {
   if $API; then
     if ocamlfind query yojson >/dev/null 2>&1; then
-      print_check_ok "Checking OCaml yojson"
+      print_check_ok "OCaml yojson"
       YOJSON=`ocamlfind query yojson`
     else
-      print_check_err "Checking OCaml yojson" \
+      print_check_err "OCaml yojson" \
           "You need the OCaml dependency yojson!"
     fi
   fi
@@ -380,15 +380,15 @@ check_redis() {
       local REDIS_VER=`opam show -f version redis`
       if testversion "$REDIS_VER" ">=" "$REDIS_MIN_VER"; then
         print_check_ok \
-          "Checking Ocaml redis version $REDIS_VER >= $REDIS_MIN_VER"
+          "Ocaml redis version $REDIS_VER >= $REDIS_MIN_VER"
         LREDIS=`ocamlfind query redis`
       else
         print_check_warn \
-          "Checking ocaml redis version $REDIS_VER" \
+          "ocaml redis version $REDIS_VER" \
           "$REDIS_MIN_VER or compatible needed."
       fi
     else
-      print_check_err "Checking OCaml redis" \
+      print_check_err "OCaml redis" \
           "You need the OCaml dependency redis!"
     fi
   fi
@@ -397,10 +397,10 @@ check_redis() {
 check_re() {
   if $API; then
     if ocamlfind query re >/dev/null 2>&1; then
-      print_check_ok "Checking OCaml re"
+      print_check_ok "OCaml re"
       RE=`ocamlfind query re`
     else
-      print_check_err "Checking OCaml re" \
+      print_check_err "OCaml re" \
           "You need the OCaml dependency re!"
     fi
   fi
