@@ -9,13 +9,6 @@ value add_lang_path : string -> unit;
 value set_base_dir : string -> unit;
 value cnt_dir : ref string;
 value image_prefix : config -> string;
-value base_path : list string -> string -> string;
-
-value find_misc_file : string -> string;
-
-value search_in_lang_path : string -> string;
-
-value etc_file_name : config -> string -> string;
 
 value escache_value : base -> string;
 value commit_patches : config -> base -> unit;
@@ -110,9 +103,15 @@ value create_env : string -> list (string * string);
 value capitale : string -> string;
 value index_of_next_char : string -> int -> int;
 
+value base_path : list string -> string -> string;
+value find_misc_file : string -> string;
+value search_in_lang_path : string -> string;
+value etc_file_name : config -> string -> string;
+
 value open_etc_file : string -> option in_channel;
 value open_hed_trl : config -> string -> option in_channel;
 value open_templ : config -> string -> option in_channel;
+
 value string_with_macros :
   config -> list (char * unit -> string) -> string -> string;
 value string_of_place : config -> string -> string;
