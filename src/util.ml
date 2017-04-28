@@ -1383,22 +1383,6 @@ value find_misc_file name =
     else ""
 ;
 
-(* Code mort. Géré par le css
-value default_background conf =
-  sprintf "background:url('%s/gwback.jpg')" (image_prefix conf)
-;
-
-value default_body_prop conf =
-  let style =
-    match p_getenv conf.env "size" with
-    [ Some v -> "font-size:" ^ v ^ ";"
-    | None -> "" ]
-  in
-  let style = sprintf "%s%s" style (default_background conf) in
-  " style=\"" ^ style ^ "\""
-;
-   Code mort. Géré par le css *)
-
 value body_prop conf =
   try
     match List.assoc "body_prop" conf.base_env with
