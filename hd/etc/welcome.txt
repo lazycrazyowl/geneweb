@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png">
   <link rel="apple-touch-icon" href="%image_prefix;/favicon_gwd.png">
-  %include.css;
+  %include;css
   %base_header;
 </head>
 %define;book_of(xx)
@@ -402,8 +402,8 @@ sv: Om din webbläsare inte automatiskt uppdaterar de modifierade sidorna
     </div>
   %end;
 %base_trailer;
-%include.copyr;
+%include;copyr
 </div>
-%include.js;
+%include;js
 </body>
 </html>

@@ -8,8 +8,8 @@
   <meta name="robots" content="none"%/>
   <meta http-equiv="Content-Type" content="text/html; charset=%charset;"%/>
   <meta http-equiv="Content-Style-Type" content="text/css"%/>
-  %include.favicon;
-  %include.css;
+  %include;favicon
+  %include;css
   %base_header;
 </head>
 <body%body_prop;>
@@ -43,6 +43,6 @@
 <p></p>
 
 %base_trailer;
-%include.copyr;
+%include;copyr
 </body>
 </html>

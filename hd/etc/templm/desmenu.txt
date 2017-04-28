@@ -16,7 +16,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=%charset;"%/>
   <meta http-equiv="Content-Style-Type" content="text/css"%/>
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png"%/>
-  %include.css;
+  %include;css
   %base_header;
 </head>
 
@@ -221,6 +221,6 @@
   </fieldset>
 </form>
   %base_trailer;
-  %include.copyr;
+  %include;copyr
 </body>
 </html>

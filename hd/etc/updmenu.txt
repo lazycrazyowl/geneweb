@@ -8,14 +8,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png">
-  %include.favicon;
-  %include.css;
+  %include;favicon
+  %include;css
   %base_header;
 </head>
 <body%body_prop;>
 %message_to_wizard;
 <div class="container">
-%include.perso_header;
+%include;perso_header
 
 <h1>%nn;
   [*update]:<br>
@@ -225,8 +225,8 @@
 %end;
 
 %base_trailer;
-%include.copyr;
+%include;copyr
 </div>
-%include.js;
+%include;js
 </body>
 </html>

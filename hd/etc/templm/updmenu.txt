@@ -78,7 +78,7 @@
 %elseif(evar.jq1b = "on")
   %apply;jq1b()
 %elseif(evar.upddag = "on")
-  %include.upddag;
+  %include;upddag
 %else;
-  %include.updmenu1;
+  %include;updmenu1
 %end;

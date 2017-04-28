@@ -7,7 +7,7 @@
   <meta http-equiv="content-type" content="text/html; charset=%charset;"%/>
   <meta http-equiv="content-style-type" content="text/css"%/>
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png"%/>
-  %include.css;
+  %include;css
   %base_header;
 </head>
 %let;ltd; title="[year/month/day]2" class="d" size="2" maxlength="2" %in;
@@ -112,6 +112,6 @@
   </fieldset>
 </form>
 %base_trailer;
-%include.copyr;
+%include;copyr
 </body>
 </html>

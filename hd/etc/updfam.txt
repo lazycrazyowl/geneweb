@@ -18,7 +18,7 @@
       [*merge::family/families]1 # %evar_i;
     %end;
   </title>
-  %include.css;
+  %include;css
   %base_header;
 </head>
 <body%body_prop;>
@@ -944,9 +944,9 @@ function changeCalendar(e,v,m,c) {
   </div>
 </form>
 
-%include.trl;
-%include.copyr;
+%include;trl
+%include;copyr
 </div>
-%include.js;
+%include;js
 </body>
 </html>

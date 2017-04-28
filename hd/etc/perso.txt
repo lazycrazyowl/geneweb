@@ -17,14 +17,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png">
   <link rel="apple-touch-icon" href="%image_prefix;/favicon_gwd.png">
-  %include.css;
+  %include;css
   %base_header;
 </head>
 <body%body_prop;>
 %message_to_wizard;
 <div class="container">
-%import;perso_utils;
-%include.menubar;
+%include;perso_utils
+%include;menubar
 %define;init_nb_asc(tplnum)
   %let;templ;%bvar.perso_module_tplnum;%in
   %if;(templ = "famille" or templ = "arbre_3gen_v" or templ = "arbre_3gen_v_photo")
@@ -82,25 +82,25 @@
   %apply;init_cache(3, 2, 2)
   %if;(has_parents and (father.has_parents or mother.has_parents))
      <div class="collapse" id="collapseExample1">
-        %let;op_m;1%in;%apply;show_templ("perso_module/gr_parents")
+        %let;op_m;1%in;%include;perso_module/gr_parents
      </div>
   %end;
  <div class="row">
     %(be carefull h1 is col-12 for full width then an opening <div class="col-8"> is inside personnal_data %)
-      %let;op_m;3%in;%apply;show_templ("perso_module/individu")
-      %let;op_m;2%in;%apply;show_templ("perso_module/unions")
-      %let;op_m;1%in;%apply;show_templ("perso_module/chronologie")
-      %let;op_m;1%in;%apply;show_templ("perso_module/notes")
-      %let;op_m;2%in;%apply;show_templ("perso_module/sources")
+      %let;op_m;3%in;%include;perso_module/individu
+      %let;op_m;2%in;%include;perso_module/unions
+      %let;op_m;1%in;%include;perso_module/chronologie
+      %let;op_m;1%in;%include;perso_module/notes
+      %let;op_m;2%in;%include;perso_module/sources
     %if;(p_mod="" or p_mod="zz")</div>%end; %( end of <div class="col-8"> from personnal_data %)
     <div class="col-4">
       %if;has_parents;
         <div class="collapse show" id="collapseExample2">
-          %let;op_m;2%in;%apply;show_templ("perso_module/arbre_3gen_photo")
+          %let;op_m;2%in;%include;perso_module/arbre_3gen_photo
         </div>
       %end;
-      %let;op_m;1%in;%apply;show_templ("perso_module/fratrie")
-      %let;op_m;1%in;%apply;show_templ("perso_module/relations")
+      %let;op_m;1%in;%include;perso_module/fratrie
+      %let;op_m;1%in;%include;perso_module/relations
     </div>
   </div>
 %elseif;(bvar.perso_module_tplnb!="" and bvar.perso_module_tplnb>0)
@@ -128,7 +128,7 @@
   <div class="row">
     <div class="col-md-8 offset-md-2 col-xl-6 offset-xl-3">
       %for;i;0;bvar.perso_module_tplnb;
-        %apply;get_templ(i)
+        %apply;include_templ(i)
       %end;
     </div>
   </div>
@@ -152,10 +152,10 @@
   %misc_names;<p>
 %end;
 %if;(not cancel_links)
-  %include.trl;
-  %include.copyr;
+  %include;trl
+  %include;copyr
 %end;
 </div>
-%include.js;
+%include;js
 </body>
 </html>

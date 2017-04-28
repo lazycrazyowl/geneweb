@@ -8,7 +8,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=%charset;"%/>
   <meta http-equiv="Content-Style-Type" content="text/css"%/>
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png"%/>
-  %include.css;
+  %include;css
   <style type="text/css">
     tr {
      text-align: left;
@@ -109,6 +109,6 @@
   </p>
 %end;
   %base_trailer;
-  %include.copyr;
+  %include;copyr
 </body>
 </html>

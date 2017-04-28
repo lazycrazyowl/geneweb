@@ -25,7 +25,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png">
-%include.css;
+%include;css
 %base_header;
 </head>
 <body%body_prop;>
@@ -1109,7 +1109,7 @@
 %end;
 
 %if;(evar.t = "P")
-  %include.perso_short;
+  %include;perso_short
 %elseif;((evar.v = "" and evar.t != "D") or evar.v <= 1)
   [*specify::generation/generations]0.
 %else;
@@ -1184,7 +1184,7 @@
     <p>[*total][:] %count; [[person/persons]1@(c)]</p>
 
   %elseif;(evar.t = "M" and evar.evt = "on")
-    %include.miss_evt;
+    %include;miss_evt
 
   %elseif;(evar.t = "M" and evar.al = "on")
     %( missing ancestors alphabetically %)
@@ -1592,9 +1592,9 @@
   %end;
 %end;
 
-%include.trl;
-%include.copyr;
+%include;trl
+%include;copyr
 </div>
-%include.js;
+%include;js
 </body>
 </html>

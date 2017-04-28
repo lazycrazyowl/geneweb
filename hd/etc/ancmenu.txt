@@ -16,14 +16,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png">
-  %include.favicon;
-  %include.css;
+  %include;favicon
+  %include;css
   %base_header;
 </head>
 <body%body_prop;>
 <div class="container-fluid">
 %message_to_wizard;
-%include.perso_header;
+%include;perso_header
 <script><!--
 
 function long_display_options () {
@@ -487,8 +487,8 @@ function no_options () {
 </form>
 
 %base_trailer;
-%include.copyr;
+%include;copyr
 </div>
-%include.js;
+%include;js
 </body>
 </html>

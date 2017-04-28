@@ -11,7 +11,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png">
-%include.css;
+%include;css
 %base_header;
 </head>
 <body%body_prop;>
@@ -609,9 +609,9 @@ zzz est lui même si yyy="desc", ou son conjoint si yyy="spous"
 
 <p>[*total][:] %apply;desc_count() [descendants] %if;(evar.marr="on" or evar.t="I")(%count1; [person/persons]1 [with] [spouse/spouses]1)%end;</p>
 
-%include.trl;
-%include.copyr;
+%include;trl
+%include;copyr
 </div>
-%include.js;
+%include;js
 </body>
 </html>

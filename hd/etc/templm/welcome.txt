@@ -7,7 +7,7 @@
   <meta charset="utf-8">
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png"%/>
   <link rel="apple-touch-icon" href="%image_prefix;/favicon_gwd.png"%/>
-  %include.css;
+  %include;css
   %base_header;
 </head>
 
@@ -254,9 +254,9 @@ zh: 网络家谱
   </table>
 <br/>
 %base_trailer;
-%include.copyr;
+%include;copyr
 </div>
 </div>
-%include.js;
+%include;js
 </body>
 </html>

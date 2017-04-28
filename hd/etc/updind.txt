@@ -14,7 +14,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png">
-  %include.css;
+  %include;css
   %base_header;
 </head>
 <body%body_prop; id="upd">
@@ -1406,17 +1406,17 @@ function changeCalendar(e,v,m,c) {
     %apply;card_header("note/notes")
     <div class="card-block">
       %let;name;notes%in;
-      %include.toolbar;
+      %include;toolbar
       <textarea class="form-control" name="notes" id="notes" rows="16">%notes;%sq;</textarea>%sq;
       <button type="submit" class="btn btn-secondary btn-sm mr-sm-3 mr-md-0 mr-lg-5" title="[*validate/delete]0" aria-label="[*validate/delete]0"><i class="fa fa-share fa-rotate-180 fa-fw" aria-hidden="true"></i><span class="hidden-md-down ml-1 font-weight-bold"></span></button>
-      <div class="ml-1"> %include.accent;</div>
+      <div class="ml-1"> %include;accent</div>
     </div>
   </div>
 </form>
 
 %base_trailer;
-%include.copyr;
+%include;copyr
 </div>
-%include.js;
+%include;js
 </body>
 </html>

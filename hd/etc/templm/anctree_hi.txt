@@ -64,7 +64,7 @@
   %and;xx%end;
 %end;
 
-%import;anctree_hi_indexes
+%include;anctree_hi_indexes
 
 %define;boxsosa(xx, yy, ll, bg) %( x = sosa, y = level max, l = level %)
   <div id="boxsosa" style="width:%if;((evar.v<9 and evar.cpl!="on") or (evar.v<10 and evar.cpl="on"))%expr(wb1*2)%else;%wb1;%end;px;height:%if;((evar.v<9 and evar.cpl!="on") or (evar.v<10 and evar.cpl="on"))%expr(hb1*2)%else;%hb1;%end;px;background-color:#bg;font-size:%if;(xx>999)5%elseif;(ll>10)7%else;9%end;px;">xx</div>

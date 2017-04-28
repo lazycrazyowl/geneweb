@@ -23,7 +23,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=%charset;"%/>
   <meta http-equiv="Content-Style-Type" content="text/css"%/>
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png"%/>
-  %include.css;
+  %include;css
   %base_header;
 </head>
 
@@ -222,7 +222,7 @@
 %end;
 
 %define;show_templ(z1)
-  %include.anctree_z1;
+  %include;anctree_z1
 %end;
 
 %if;(evar.t = "T" and (evar.t1 = "T" or evar.t1 = ""))
@@ -232,18 +232,18 @@
 %elseif;(evar.t = "C" or evar.t1 = "C")
   <div style="text-align: center">%apply;female_line("self",l_v0)</div>
 %elseif;(evar.t1= "CT")
-  %include.anctree_hi;
+  %include;anctree_hi
 %elseif;(evar.t1 = "HT")
-  %include.anclist_hrztl;
+  %include;anclist_hrztl
 %elseif;(evar.t1 != "")
   %apply;show_templ(evar.t1)
 %end;
 
 %if;not cancel_links;
-  %import;tools;
+  %include;tools
   %apply;tools_anctree()
   %base_trailer;
-  %include.copyr;
+  %include;copyr
 %end;
 </body>
 </html>

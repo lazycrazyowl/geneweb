@@ -8,13 +8,13 @@
   <meta http-equiv="Content-Type" content="text/html; charset=%charset;"%/>
   <meta http-equiv="Content-Style-Type" content="text/css"%/>
   <link rel="shortcut icon" href="%image_prefix;/favicon_gwd.png"%/>
-  %include.css;
-  %import;js_upd
+  %include;css
+  %include;js_upd
   %base_header;
 </head>
 <body%body_prop; id="dag">
 %message_to_wizard;
-%import;updind_updfam
+%include;updind_updfam
 
 %let;lt4;title="%ak6;%ak3;%ak7;"%in;
 
@@ -105,6 +105,6 @@
 
 <div style="height:300px;clear:both;"> </div>
   %base_trailer;
-  %include.copyr;
+  %include;copyr
 </body>
 </html>
