@@ -465,7 +465,7 @@ value parse_templ conf strm =
         (* Protection pour ne pas inclure plusieurs fois un même template ? *)
         if not (List.mem file included_files.val) then
           let al =
-            match Util.open_templ conf file with
+            match Util.open_etc_file_name conf file with
             [ Some ic ->
                 let () = included_files.val := [ file :: included_files.val] in
                 let strm2 = (Stream.of_channel ic) in
@@ -557,7 +557,7 @@ value parse_templ conf strm =
 ;
 
 value input_templ conf fname =
-  match Util.open_templ conf fname with
+  match Util.open_etc_file_name conf fname with
   [ Some ic ->
       let astl = parse_templ conf (Stream.of_channel ic) in
       do { close_in ic; Some astl }
@@ -1028,7 +1028,7 @@ value rec eval_expr ((conf, eval_var, eval_apply) as ceva) =
 ;
 
 value line_of_loc conf fname (bp, ep) =
-  match Util.open_templ conf fname with
+  match Util.open_etc_file_name conf fname with
   [ Some ic ->
       let strm = Stream.of_channel ic in
       let rec loop lin =
@@ -1317,7 +1317,7 @@ value print_copyright_with_logo conf =
 ;
 
 value include_hed_trl conf name =
-  match Util.open_hed_trl conf name with
+  match Util.open_etc_file_name conf name with
   [ Some ic -> copy_from_templ conf [] ic
   | None -> () ]
 ;

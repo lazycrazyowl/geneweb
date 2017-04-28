@@ -103,14 +103,19 @@ value create_env : string -> list (string * string);
 value capitale : string -> string;
 value index_of_next_char : string -> int -> int;
 
-value base_path : list string -> string -> string;
-value find_misc_file : string -> string;
-value search_in_lang_path : string -> string;
-value etc_file_name : config -> string -> string;
+(** Search file (template, image...) in gw. *)
 
+value open_gw_etc_file : string -> option in_channel;
+value open_base_etc_file : config -> string -> option in_channel;
+
+value base_path : list string -> string -> string;
+
+value search_in_lang_path : string -> string;
+value etc_file : string -> string;
 value open_etc_file : string -> option in_channel;
-value open_hed_trl : config -> string -> option in_channel;
-value open_templ : config -> string -> option in_channel;
+
+value etc_file_name : config -> string -> string;
+value open_etc_file_name : config -> string -> option in_channel;
 
 value string_with_macros :
   config -> list (char * unit -> string) -> string -> string;

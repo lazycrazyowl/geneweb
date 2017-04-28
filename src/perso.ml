@@ -5304,7 +5304,7 @@ value gen_interp_templ menu title templ_fname conf base p = do {
     (* Petit calcul pour voir si le fichier est vide => on   *)
     (* ne veut pas utiliser le header avec la barre de menu. *)
     let size =
-      match Util.open_templ conf templ_fname with
+      match Util.open_etc_file_name conf templ_fname with
       [ Some ic -> do {
           let fd = Unix.descr_of_in_channel ic in
           let stats = Unix.fstat fd in
