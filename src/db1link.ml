@@ -722,7 +722,7 @@ value update_fevents_with_family gen fam =
   {(fam) with fevents = fevents}
 ;
 
-value insert_family gen co fath_sex moth_sex witl fevtl fo deo =
+value insert_family gen co fath_sex moth_sex witl fevt_witl fo deo =
   let (fath, ifath) = insert_somebody gen (Adef.father co) in
   let (moth, imoth) = insert_somebody gen (Adef.mother co) in
   let witl =
@@ -735,34 +735,33 @@ value insert_family gen co fath_sex moth_sex witl fevtl fo deo =
        })
       witl
   in
-  (* On tri les évènements pour être sûr. *)
   let fevents =
-    CheckItem.sort_events
-      ((fun (name, _, _, _, _, _, _) -> CheckItem.Fsort name),
-       (fun (_, date, _, _, _, _, _) -> date))
-      fevtl
-  in
-  let fevents =
-    List.map
-      (fun (name, date, place, reason, src, notes, witl) ->
-        let witnesses =
-          List.map
-            (fun (wit, sex, wk) -> do {
-               let (p, ip) = insert_somebody gen wit in
-               notice_sex gen p sex;
-               p.m_related := [ifath :: p.m_related];
-               (ip, wk)
-            })
-            witl
-        in
-        {efam_name = fevent_name_unique_string gen name;
-         efam_date = date;
-         efam_place = unique_string gen place;
-         efam_reason = unique_string gen reason;
-         efam_note = unique_string gen notes;
-         efam_src = unique_string gen src;
-         efam_witnesses = Array.of_list witnesses})
-      fevents
+    let rec loop fevents fevt_witl fevents_witl =
+      match (fevents, fevt_witl) with
+      [ ([], []) -> List.rev fevents_witl
+      | ([e :: el], [w :: wl]) ->
+          let witl =
+            List.map
+              (fun (wit, sex, wk) -> do {
+                 let (p, ip) = insert_somebody gen wit in
+                 notice_sex gen p sex;
+                 p.m_related := [ifath :: p.m_related];
+                 (ip, wk) })
+              w
+          in
+          let evt =
+            {efam_name = fevent_name_unique_string gen e.efam_name;
+             efam_date = e.efam_date;
+             efam_place = unique_string gen e.efam_place;
+             efam_reason = unique_string gen e.efam_reason;
+             efam_note = unique_string gen e.efam_note;
+             efam_src = unique_string gen e.efam_src;
+             efam_witnesses = Array.of_list witl}
+          in
+          loop el wl [evt :: fevents_witl]
+      | _ -> assert False ]
+    in
+    loop fo.fevents fevt_witl []
   in
   let children =
     Array.map
@@ -981,11 +980,10 @@ value insert_relations fname gen sb sex rl =
 
 value insert_syntax fname gen =
   fun
-  [ Family cpl fs ms witl fevents fam des ->
-      insert_family gen cpl fs ms witl fevents fam des
+  [ Family cpl fs ms witl fevt_witl fam des ->
+      insert_family gen cpl fs ms witl fevt_witl fam des
   | Notes key str -> insert_notes fname gen key str
   | Relations sb sex rl -> insert_relations fname gen sb sex rl
-  | Pevent sb sex pevents -> insert_pevents fname gen sb sex pevents
   | Bnotes nfname str -> insert_bnotes fname gen nfname str
   | Wnotes wizid str -> insert_wiznote fname gen wizid str ]
 ;

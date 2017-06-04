@@ -62,8 +62,7 @@ type gen =
     g_person_unions : (Iochan.t * out_channel);
     g_person_rparents : (Iochan.t * out_channel);
     g_person_related : (Iochan.t * Iochan.t);
-    g_person_notes : (Iochan.t * out_channel);
-    g_person_pevents : (Iochan.t * out_channel)}
+    g_person_notes : (Iochan.t * out_channel)}
 ;
 
 value person_fields_arr =
@@ -441,16 +440,6 @@ value insert_person1 gen so = do {
         Iochan.output_binary_int (fst gen.g_person_related) (-1);
         Iochan.seek (fst gen.g_person_notes) (int_size * gen.g_pcnt);
         Iochan.output_binary_int (fst gen.g_person_notes) (-1);
-        (*
-        Iochan.seek (fst gen.g_person_pevents) (int_size * gen.g_pcnt);
-        if so.pevents = [] then
-          Iochan.output_binary_int (fst gen.g_person_pevents) (-1)
-        else do {
-          Iovalue.output (snd gen.g_person_pevents) so.pevents;
-          let pos = pos_out (snd gen.g_person_pevents) in
-          Iochan.output_binary_int (fst gen.g_person_pevents) pos;
-        };
-        *)
         gen.g_pcnt := gen.g_pcnt + 1;
       } ]
   }
@@ -465,15 +454,15 @@ value insert_somebody1 gen sex =
       insert_person1 gen so ]
 ;
 
-value insert_family1 gen co fath_sex moth_sex witl fevents fo deo = do {
+value insert_family1 gen co fath_sex moth_sex witl fevt_witl fo deo = do {
   let _ifath = insert_somebody1 gen fath_sex (Adef.father co) in
   let _imoth = insert_somebody1 gen moth_sex (Adef.mother co) in
   Array.iter (fun key -> insert_person1 gen key) deo.children;
   List.iter (fun (so, sex) -> insert_somebody1 gen sex so) witl;
   List.iter
-    (fun (_, _, _, _, _, _, wl) ->
-       List.iter (fun (so, sex, _) -> insert_somebody1 gen sex so) wl)
-    fevents
+    (fun wl -> List.iter (fun (so, sex, _) -> insert_somebody1 gen sex so) wl)
+    fevt_witl;
+  (*TODO same for pevents*)
 };
 
 value iter_option f =
@@ -490,14 +479,6 @@ value insert_relation1 gen r = do {
 value insert_rparents1 gen sb sex rl = do {
   insert_somebody1 gen sex sb;
   List.iter (insert_relation1 gen) rl
-};
-
-value insert_pevents1 gen sb sex pevents = do {
-  insert_somebody1 gen sex sb;
-  List.iter
-    (fun (_, _, _, _, _, _, wl) ->
-       List.iter (fun (so, sex, _) -> insert_somebody1 gen sex so) wl)
-    pevents
 };
 
 value insert_bnotes1 gen notesname str = do {
@@ -547,11 +528,10 @@ value insert_wiznotes1 gen wizid str = do {
 
 value insert_gwo_1 gen =
   fun
-  [ Family cpl fs ms witl fevents fam des ->
-      insert_family1 gen cpl fs ms witl fevents fam des
+  [ Family cpl fs ms witl fevt_witl fam des ->
+      insert_family1 gen cpl fs ms witl fevt_witl fam des
   | Notes key str -> ()
   | Relations sb sex rl -> insert_rparents1 gen sb sex rl
-  | Pevent sb sex pevents -> insert_pevents1 gen sb sex pevents
   | Bnotes nfname str -> insert_bnotes1 gen nfname str
   | Wnotes wizid str -> insert_wiznotes1 gen wizid str ]
 ;
@@ -611,14 +591,6 @@ value insert_undefined2 gen key fn sn sex = do {
   Iochan.output_binary_int (fst gen.g_person_related) (-1);
   Iochan.seek (fst gen.g_person_notes) (int_size * gen.g_pcnt);
   Iochan.output_binary_int (fst gen.g_person_notes) (-1);
-  Iochan.seek (fst gen.g_person_pevents) (int_size * gen.g_pcnt);
-  if so.pevents = [] then
-    Iochan.output_binary_int (fst gen.g_person_pevents) (-1)
-  else do {
-    Iovalue.output (snd gen.g_person_pevents) so.pevents;
-    let pos = pos_out (snd gen.g_person_pevents) in
-    Iochan.output_binary_int (fst gen.g_person_pevents) pos;
-  };
   gen.g_pcnt := gen.g_pcnt + 1;
   Adef.iper_of_int (gen.g_pcnt - 1)
 };
@@ -666,14 +638,6 @@ value get_person2 gen so sex =
     Iochan.output_binary_int (fst gen.g_person_related) (-1);
     Iochan.seek (fst gen.g_person_notes) (int_size * gen.g_pcnt);
     Iochan.output_binary_int (fst gen.g_person_notes) (-1);
-    Iochan.seek (fst gen.g_person_pevents) (int_size * gen.g_pcnt);
-    if so.pevents = [] then
-      Iochan.output_binary_int (fst gen.g_person_pevents) (-1)
-    else do {
-      Iovalue.output (snd gen.g_person_pevents) so.pevents;
-      let pos = pos_out (snd gen.g_person_pevents) in
-      Iochan.output_binary_int (fst gen.g_person_pevents) pos;
-    };
     gen.g_pcnt := gen.g_pcnt + 1;
     Adef.iper_of_int (gen.g_pcnt - 1)
   }
@@ -872,7 +836,7 @@ value update_fevents_with_family fam =
   {(fam) with fevents = fevents}
 ;
 
-value insert_family2 gen co fath_sex moth_sex witl fevents fo deo = do {
+value insert_family2 gen co fath_sex moth_sex witl fevt_witl fo deo = do {
   let ifath = get_somebody2 gen fath_sex (Adef.father co) in
   let imoth = get_somebody2 gen moth_sex (Adef.mother co) in
   let children =
@@ -887,29 +851,24 @@ value insert_family2 gen co fath_sex moth_sex witl fevents fo deo = do {
        })
       witl
   in
-  (* On tri les évènements pour être sûr. *)
   let fevents =
-    CheckItem.sort_events
-      ((fun (name, _, _, _, _, _, _) -> CheckItem.Fsort name),
-       (fun (_, date, _, _, _, _, _) -> date))
-      fevents
-  in
-  let fevents =
-    List.map
-      (fun (name, date, place, reason, note, src, wl) ->
-         let wl =
-           List.map
-             (fun (so, sex, wk) -> do {
-                let ip = get_somebody2 gen sex so in
-                insert_related gen ip ifath;
-                (ip, wk)
-             })
-           wl
-         in
-         {efam_name = name; efam_date = date; efam_place = place;
-          efam_reason = reason; efam_note = note; efam_src = src;
-          efam_witnesses = Array.of_list wl})
-      fevents
+    let rec loop fevents fevt_witl fevents_witl =
+      match (fevents, fevt_witl) with
+      [ ([], []) -> List.rev fevents_witl
+      | ([e :: el], [w :: wl]) ->
+          let witl =
+            List.map
+              (fun (so, sex, wk) -> do {
+                 let ip = get_somebody2 gen sex so in
+                 insert_related gen ip ifath;
+                 (ip, wk) })
+              w
+          in
+          let evt = {(e) with efam_witnesses = Array.of_list witl} in
+          loop el wl [evt :: fevents_witl]
+      | _ -> assert False ]
+    in
+    loop fo.fevents fevt_witl []
   in
   let fo = {(fo) with witnesses = Array.of_list witn; fevents = fevents} in
   (* On mets à jour les fevents et events normaux *)
@@ -990,45 +949,12 @@ value insert_rparents2 gen sb sex rl = do {
   Iochan.output_binary_int (fst gen.g_person_rparents) pos;
 };
 
-value insert_pevents2 gen sb sex pevents = do {
-  let ip = get_somebody2 gen sex sb in
-  let pos = pos_out (snd gen.g_person_pevents) in
-  (* On tri les évènements pour être sûr. *)
-  let pevents =
-    CheckItem.sort_events
-      ((fun (name, _, _, _, _, _, _) -> CheckItem.Psort name),
-       (fun (_, date, _, _, _, _, _) -> date))
-      pevents
-  in
-  let pevents =
-    List.map
-      (fun (name, date, place, reason, note, src, wl) ->
-         let wl =
-           List.map
-             (fun (so, sex, wk) -> do {
-                let iw = get_somebody2 gen sex so in
-                insert_related gen ip iw;
-                (iw, wk)
-             })
-           wl
-         in
-         {epers_name = name; epers_date = date; epers_place = place;
-          epers_reason = reason; epers_note = note; epers_src = src;
-          epers_witnesses = Array.of_list wl})
-      pevents
-  in
-  Iovalue.output (snd gen.g_person_pevents) pevents;
-  Iochan.seek (fst gen.g_person_pevents) (int_size * Adef.int_of_iper ip);
-  Iochan.output_binary_int (fst gen.g_person_pevents) pos;
-};
-
 value insert_gwo_2 gen =
   fun
-  [ Family cpl fs ms witl fevents fam des ->
-      insert_family2 gen cpl fs ms witl fevents fam des
+  [ Family cpl fs ms witl fevt_witl fam des ->
+      insert_family2 gen cpl fs ms witl fevt_witl fam des
   | Notes key str -> insert_notes2 gen key str
   | Relations sb sex rl -> insert_rparents2 gen sb sex rl
-  | Pevent sb sex pevents -> insert_pevents2 gen sb sex pevents
   | Bnotes nfname str -> ()
   | Wnotes wizid str -> () ]
 ;
@@ -1564,8 +1490,7 @@ value link next_family_fun bdir = do {
      g_person_unions = person_unions;
      g_person_rparents = person_rparents;
      g_person_related = person_related;
-     g_person_notes = person_notes;
-     g_person_pevents = person_pevents}
+     g_person_notes = person_notes}
   in
   if Mutil.verbose.val then do {
     eprintf "pass 1: creating persons...\n";

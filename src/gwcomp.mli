@@ -13,16 +13,11 @@ type gw_syntax =
   [ Family of
       gen_couple somebody and sex and sex and
         list (somebody * sex) and
-        list (gen_fam_event_name string * codate * string * string * 
-                string * string * list (somebody * sex * witness_kind)) and
+        list (list (somebody * sex * witness_kind)) and
         gen_family (gen_person iper string) string and
         gen_descend (gen_person iper string)
   | Notes of key and string
   | Relations of somebody and sex and list (gen_relation somebody string)
-  | Pevent of 
-      somebody and sex and 
-        list (gen_pers_event_name string * codate * string * 
-                string * string * string * list (somebody * sex * witness_kind))
   | Bnotes of string and string
   | Wnotes of string and string ]
 ;

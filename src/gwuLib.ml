@@ -90,8 +90,8 @@ value prepare_free_occ base =
         let sn = sou base (get_surname p) in
         let fn = sou base (get_first_name p) in
         let key = Name.lower fn ^ " #@# " ^ Name.lower sn in
-  try
-    do {
+        try
+          do {
             let list_occ = Hashtbl.find ht_orig_occ key in
             let rec loop list init new_list =
               match list with
@@ -106,8 +106,8 @@ value prepare_free_occ base =
             let (new_occ, new_list_occ) = loop list_occ 0 [] in
             Hashtbl.replace ht_dup_occ ip new_occ;
             Hashtbl.replace ht_orig_occ key new_list_occ
-    }
-  with
+          }
+        with
         [ Not_found -> () ] )
       ht_dup_occ
   }
@@ -439,8 +439,7 @@ type gen =
     fam_done : array bool;
     notes_pl_p : mutable list person;
     ext_files : mutable list (string * ref (list string));
-    notes_alias : mutable list (string * string);
-    pevents_pl_p : mutable list person }
+    notes_alias : mutable list (string * string) }
 ;
 
 value map_notes aliases f =
@@ -543,66 +542,6 @@ value print_parent oc base gen fam p =
   }
 ;
 
-value print_child oc base fam_surname csrc cbp p =
-  do {
-    fprintf oc "-";
-    match get_sex p with
-    [ Male -> fprintf oc " h"
-    | Female -> fprintf oc " f"
-    | _ -> () ];
-    fprintf oc " %s" (s_correct_string (sou base (get_first_name p)));
-    if p_first_name base p = "?" && p_surname base p = "?" then ()
-    else if get_new_occ p = 0  then ()
-    else fprintf oc ".%d" (get_new_occ p);
-    if not (eq_istr (get_surname p) fam_surname) then
-      fprintf oc " %s" (s_correct_string_nonum (sou base (get_surname p)))
-    else ();
-    print_infos oc base True csrc cbp p;
-    fprintf oc "\n"
-  }
-;
-
-value bogus_person base p =
-  p_first_name base p = "?" && p_surname base p = "?"
-;
-
-value common_children proj base children =
-  if Array.length children <= 1 then None
-  else
-    let list =
-      List.map (fun p -> sou base (proj p)) (Array.to_list children)
-    in
-    if List.mem "" list then None
-    else
-      let list = List.sort compare list in
-      let (src_max, n_max, _, _) =
-        List.fold_left
-          (fun (src_max, n_max, prev_src, n) src ->
-             if src = prev_src then
-               let n = n + 1 in
-               if n > n_max then (src, n, src, n)
-               else (src_max, n_max, src, n)
-             else (src_max, n_max, src, 1))
-          ("", 0, "", 0) list
-      in
-      if n_max > 1 then Some src_max else None
-;
-
-value common_children_sources = common_children get_psources;
-value common_children_birth_place = common_children get_birth_place;
-
-value array_forall f a =
-  loop 0 where rec loop i =
-    if i = Array.length a then True
-    else if f a.(i) then loop (i + 1)
-    else False
-;
-
-value empty_family base m =
-  bogus_person base m.m_fath && bogus_person base m.m_moth &&
-  array_forall (bogus_person base) m.m_chil
-;
-
 value print_witness oc base gen p =
   do {
     fprintf oc "%s %s%s" (correct_string base (get_surname p))
@@ -620,8 +559,6 @@ value print_witness oc base gen p =
             gen.notes_pl_p := [p :: gen.notes_pl_p]
           else ()
       | _ -> gen.notes_pl_p := [p :: gen.notes_pl_p] ];
-      if get_pevents p <> [] then gen.pevents_pl_p := [p :: gen.pevents_pl_p]
-      else ();
     }
     else ()
   }
@@ -741,13 +678,72 @@ value print_pevents_for_person oc base gen p =
   let surn = s_correct_string (p_surname base p) in
   let fnam = s_correct_string (p_first_name base p) in
   if pevents <> [] && surn <> "?" && fnam <> "?" then do {
-    fprintf oc "\n";
-    fprintf oc "pevt %s %s%s\n" surn fnam
-      (if get_new_occ p = 0 then "" else "." ^ string_of_int (get_new_occ p));
+    fprintf oc "pevt\n";
     List.iter (print_pevent oc base gen) pevents;
     fprintf oc "end pevt\n";
   }
   else ()
+;
+
+value print_child oc base gen fam_surname csrc cbp p =
+  do {
+    fprintf oc "-";
+    match get_sex p with
+    [ Male -> fprintf oc " h"
+    | Female -> fprintf oc " f"
+    | _ -> () ];
+    fprintf oc " %s" (s_correct_string (sou base (get_first_name p)));
+    if p_first_name base p = "?" && p_surname base p = "?" then ()
+    else if get_new_occ p = 0  then ()
+    else fprintf oc ".%d" (get_new_occ p);
+    if not (eq_istr (get_surname p) fam_surname) then
+      fprintf oc " %s" (s_correct_string_nonum (sou base (get_surname p)))
+    else ();
+    print_infos oc base True csrc cbp p;
+    fprintf oc "\n";
+    print_pevents_for_person oc base gen p;
+  }
+;
+
+value bogus_person base p =
+  p_first_name base p = "?" && p_surname base p = "?"
+;
+
+value common_children proj base children =
+  if Array.length children <= 1 then None
+  else
+    let list =
+      List.map (fun p -> sou base (proj p)) (Array.to_list children)
+    in
+    if List.mem "" list then None
+    else
+      let list = List.sort compare list in
+      let (src_max, n_max, _, _) =
+        List.fold_left
+          (fun (src_max, n_max, prev_src, n) src ->
+             if src = prev_src then
+               let n = n + 1 in
+               if n > n_max then (src, n, src, n)
+               else (src_max, n_max, src, n)
+             else (src_max, n_max, src, 1))
+          ("", 0, "", 0) list
+      in
+      if n_max > 1 then Some src_max else None
+;
+
+value common_children_sources = common_children get_psources;
+value common_children_birth_place = common_children get_birth_place;
+
+value array_forall f a =
+  loop 0 where rec loop i =
+    if i = Array.length a then True
+    else if f a.(i) then loop (i + 1)
+    else False
+;
+
+value empty_family base m =
+  bogus_person base m.m_fath && bogus_person base m.m_moth &&
+  array_forall (bogus_person base) m.m_chil
 ;
 
 value rec list_memf f x =
@@ -758,22 +754,6 @@ value rec list_memf f x =
 
 value eq_key p1 p2 = get_key_index p1 = get_key_index p2;
 value eq_key_fst (p1, _) (p2, _) = get_key_index p1 = get_key_index p2;
-
-value print_pevents oc base gen ml =
-  let pl =
-    List.fold_right (get_persons_with_pevents base) ml gen.pevents_pl_p
-  in
-  let pl =
-    List.fold_right
-      (fun p pl -> if list_memf eq_key p pl then pl else [p :: pl]) pl []
-  in
-  List.iter
-    (fun p ->
-       if gen.per_sel (get_key_index p) then
-         print_pevents_for_person oc base gen p
-       else ())
-    pl
-;
 
 value print_fevent oc base gen in_comment e = do {
   let print_sep () =
@@ -862,11 +842,11 @@ value print_comment_for_family oc base gen fam =
   else ()
 ;
 
-value print_empty_family oc base p = do {
+value print_empty_family oc base gen p = do {
   let string_quest = Gwdb.insert_string base "?" in
   fprintf oc "fam ? ?.0 + #noment ? ?.0\n";
   fprintf oc "beg\n";
-  print_child oc base string_quest "" "" p;
+  print_child oc base gen string_quest "" "" p;
   fprintf oc "end\n";
 };
 
@@ -960,7 +940,7 @@ value print_family oc base gen m =
           Array.iter
             (fun p ->
                if gen.per_sel (get_key_index p) then
-                 print_child oc base fam_surname csrc cbp p
+                 print_child oc base gen fam_surname csrc cbp p
                else ())
             m.m_chil;
           fprintf oc "end\n"
@@ -1386,9 +1366,10 @@ value print_relations oc base gen ml =
           if get_rparents p <> [] && gen.per_sel (get_key_index p) then do {
             print_relations_for_person oc base gen def_p if_def p;
             List.iter (print_notes_for_person oc base gen) def_p.val;
-            if not old_gw.val then
-              List.iter (print_pevents_for_person oc base gen) def_p.val
-            else ()
+            (*TODO print + parse*)
+            (* if not old_gw.val then *)
+            (*   List.iter (print_pevents_for_person oc base gen) def_p.val *)
+            (* else () *)
           }
           else ();
           loop (pl @ List.map (fun p -> (p, False)) def_p.val)
@@ -1747,7 +1728,7 @@ value gwu base in_dir out_dir out_oc src_oc_ht anc desc ancdesc =
     let fam_done = Array.make (nb_of_families base) False in
     {mark = mark; mark_rel = mark_rel; per_sel = per_sel; fam_sel = fam_sel;
      fam_done = fam_done; notes_pl_p = []; ext_files = [];
-     notes_alias = notes_aliases in_dir; pevents_pl_p = []}
+     notes_alias = notes_aliases in_dir}
   in
   let nb_fam = nb_of_families base in
   do {
@@ -1784,14 +1765,11 @@ value gwu base in_dir out_dir out_oc src_oc_ht anc desc ancdesc =
         in
         if ml <> [] then do {
           gen.notes_pl_p := [];
-          gen.pevents_pl_p := [];
           if not first.val then fprintf oc "\n" else ();
           first.val := False;
           List.iter (print_family oc base gen) ml;
           print_notes oc base gen ml;
           print_relations oc base gen ml;
-          if not old_gw.val then print_pevents oc base gen ml
-          else ();
         }
         else ()
       else ()
@@ -1824,7 +1802,7 @@ value gwu base in_dir out_dir out_oc src_oc_ht anc desc ancdesc =
                 let (oc, _first) = origin_file (base_notes_origin_file base) in
                 do {
                   fprintf oc "\n";
-                  print_empty_family oc base p;
+                  print_empty_family oc base gen p;
                   print_notes_for_person oc base gen p;
                   gen.mark.(i) := True;
                   print_isolated_relations oc base gen p;

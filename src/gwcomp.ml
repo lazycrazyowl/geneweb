@@ -16,16 +16,11 @@ type somebody = [ Undefined of key | Defined of gen_person iper string ];
 type gw_syntax =
   [ Family of gen_couple somebody and sex and sex and
       list (somebody * sex) and
-      list (gen_fam_event_name string * codate * string * string *
-              string * string * list (somebody * sex * witness_kind)) and
+      list (list (somebody * sex * witness_kind)) and
       gen_family (gen_person iper string) string and
       gen_descend (gen_person iper string)
   | Notes of key and string
   | Relations of somebody and sex and list (gen_relation somebody string)
-  | Pevent of
-      somebody and sex and
-        list (gen_pers_event_name string * codate * string *
-                string * string * string * list (somebody * sex * witness_kind))
   | Bnotes of string and string
   | Wnotes of string and string ]
 ;
@@ -1002,53 +997,133 @@ value read_family ic fname =
                       in
                       let notes = Mutil.strip_all_trailing_spaces notes in
                       let evt =
-                        (name, date, place, cause, src, notes, witn)
+                        {efam_name = name; efam_date = date; efam_place = place;
+                         efam_reason = cause; efam_note = notes; efam_src = src;
+                         efam_witnesses = [| |]}
                       in
-                      loop [evt :: fevents] line } ]
+                      loop [(evt, witn) :: fevents] line } ]
               in
               (List.rev fevents, line)
           | _ -> ([], line) ]
         in
+        let (fevents, fevt_witl) = List.split fevents in
         match line with
         [ Some (_, ["beg"]) ->
             let cles_enfants =
-              let rec loop children =
-                match read_line ic with
+              let rec loop_child children line =
+                match line with
                 [ Some (str, ["-" :: l]) ->
                     let (sex, l) = get_optional_sexe l in
                     let (child, l) = parse_child str surname sex csrc cbp l in
-                    do {
-                      if l <> [] then failwith str
-                      else loop [child :: children]
-                    }
+                    let () = if l <> [] then failwith str else () in
+                    let (pevents, line) =
+                      match read_line ic with
+                      [ Some (str, ["pevt" :: l]) ->
+                          let (pevents, l) =
+                            loop_pevt [] (input_a_line ic) where rec loop_pevt pevents =
+                              fun
+                              [ "end pevt" -> (pevents, [])
+                              | x -> do {
+                                  let (str, l) = (x, fields x) in
+                                  (* On récupère le nom, date, lieu, source, cause *)
+                                  let (name, l) = get_pevent_name str l in
+                                  let (date, l) = get_optional_event_date l in
+                                  let (place, l) = get_field "#p" l in
+                                  let (cause, l) = get_field "#c" l in
+                                  let (src, l) = get_field "#s" l in
+                                  let date =
+                                    match date with
+                                    [ None -> Adef.codate_None
+                                    | Some x -> Adef.codate_of_od x ]
+                                  in
+                                  if l <> [] then failwith str else ();
+                                  (* On récupère les témoins *)
+                                  let (witn, line) =
+                                    loop_witn (input_a_line ic) where rec loop_witn str =
+                                      match fields str with
+                                      [ ["wit" | "wit:" :: l] ->
+                                          let (sex, l) =
+                                            match l with
+                                            [ ["m:" :: l] -> (Male, l)
+                                            | ["f:" :: l] -> (Female, l)
+                                            | l -> (Neuter, l) ]
+                                          in
+                                          let (wkind, l) = get_event_witness_kind str l in
+                                          let (wk, _, l) = parse_parent str l in
+                                          do {
+                                            if l <> [] then failwith str else ();
+                                            let (witn, str) =
+                                              loop_witn (input_a_line ic)
+                                            in
+                                            ([(wk, sex, wkind) :: witn], str)
+                                          }
+                                      | line -> ([], str) ]
+                                  in
+                                  (* On récupère les notes *)
+                                  let (notes, line) =
+                                    loop_note line where rec loop_note str =
+                                      match fields str with
+                                      [ ["note" :: l] ->
+                                          let note =
+                                            match l with
+                                            [ [] -> ""
+                                            | [_ :: l'] ->
+                                                String.sub str
+                                                  (String.length "note" + 1)
+                                                  (String.length str - String.length "note" - 1)]
+                                          in
+                                          let (notes, str) =
+                                            loop_note (input_a_line ic)
+                                          in
+                                          (note ^ "\n" ^ notes, str)
+                                      | line -> ("", str) ]
+                                  in
+                                  let notes = Mutil.strip_all_trailing_spaces notes in
+                                  let evt =
+                                    {epers_name = name; epers_date = date;
+                                     epers_place = place; epers_reason = cause;
+                                     epers_note = notes; epers_src = src;
+                                     epers_witnesses = [| |]}
+                                  in
+                                  loop_pevt [evt :: pevents] line } ]
+                          in
+                          let pevents = List.rev pevents in
+                          do {
+                            if l <> [] then failwith str
+                            else (pevents, read_line ic)
+                          }
+                      | line -> ([], line) ]
+                    in
+                    let child = {(child) with pevents = pevents} in
+                    loop_child [child :: children] line
                 | Some (str, ["end"]) -> children
                 | Some (str, _) -> failwith str
                 | _ -> failwith "eof" ]
               in
-              List.rev (loop [])
+              List.rev (loop_child [] (read_line ic))
             in
             let fo =
               {marriage = marriage; marriage_place = marr_place;
                marriage_note = marr_note; marriage_src = marr_src;
                witnesses = [| |]; relation = relation;
-               divorce = divorce; fevents = [];
+               divorce = divorce; fevents = fevents;
                comment = comm; origin_file = fname;
                fsources = fsrc; fam_index = Adef.ifam_of_int (-1)}
             in
             let deo = {children = Array.of_list cles_enfants} in
             F_some
-              (Family co fath_sex moth_sex witn fevents fo deo, read_line ic)
+              (Family co fath_sex moth_sex witn fevt_witl fo deo, read_line ic)
         | line ->
             let fo =
               {marriage = marriage; marriage_place = marr_place;
                marriage_note = marr_note; marriage_src = marr_src;
                witnesses = [| |]; relation = relation;
-               divorce = divorce; fevents = [];
+               divorce = divorce; fevents = fevents;
                comment = comm; origin_file = fname;
                fsources = fsrc; fam_index = Adef.ifam_of_int (-1)}
             in
             let deo = {children = [| |]} in
-            F_some (Family co fath_sex moth_sex witn fevents fo deo, line) ]
+            F_some (Family co fath_sex moth_sex witn fevt_witl fo deo, line) ]
       }
   | Some (str, ["notes-db"]) ->
       let notes = read_notes_db ic "end notes-db" in
@@ -1112,71 +1187,6 @@ value read_family ic fname =
             F_some (Relations sb sex rl, read_line ic)
         | Some (str, _) -> failwith str
         | None -> failwith "end of file" ]
-  | Some (str, ["pevt" :: l]) ->
-      let (sb, _, l) = parse_parent str l in
-      if l <> [] then failwith str
-      else
-        let pevents =
-          loop [] (input_a_line ic) where rec loop pevents =
-            fun
-            [ "end pevt" -> pevents
-            | x -> do {
-                let (str, l) = (x, fields x) in
-                (* On récupère le nom, date, lieu, source, cause *)
-                let (name, l) = get_pevent_name str l in
-                let (date, l) = get_optional_event_date l in
-                let (place, l) = get_field "#p" l in
-                let (cause, l) = get_field "#c" l in
-                let (src, l) = get_field "#s" l in
-                let date =
-                  match date with
-                  [ None -> Adef.codate_None
-                  | Some x -> Adef.codate_of_od x ]
-                in
-                if l <> [] then failwith str else ();
-                (* On récupère les témoins *)
-                let (witn, line) =
-                  loop_witn (input_a_line ic) where rec loop_witn str =
-                    match fields str with
-                    [ ["wit" | "wit:" :: l] ->
-                        let (sex, l) =
-                          match l with
-                          [ ["m:" :: l] -> (Male, l)
-                          | ["f:" :: l] -> (Female, l)
-                          | l -> (Neuter, l) ]
-                        in
-                        let (wkind, l) = get_event_witness_kind str l in
-                        let (wk, _, l) = parse_parent str l in
-                        do {
-                          if l <> [] then failwith str else ();
-                          let (witn, str) = loop_witn (input_a_line ic) in
-                          ([(wk, sex, wkind) :: witn], str)
-                        }
-                    | line -> ([], str) ]
-                in
-                (* On récupère les notes *)
-                let (notes, line) =
-                  loop_note line where rec loop_note str =
-                    match fields str with
-                    [ ["note" :: l] ->
-                        let note =
-                          match l with
-                            [ [] -> ""
-                            | [_ :: l'] ->
-                                String.sub str
-                                  (String.length "note" + 1)
-                                  (String.length str - String.length "note" - 1)]
-                        in
-                        let (notes, str) = loop_note (input_a_line ic) in
-                        (note ^ "\n" ^ notes, str)
-                    | line -> ("", str) ]
-                in
-                let notes = Mutil.strip_all_trailing_spaces notes in
-                let evt = (name, date, place, cause, src, notes, witn) in
-                loop [evt :: pevents] line } ]
-        in
-        let pevents = List.rev pevents in
-        F_some (Pevent sb Neuter pevents, read_line ic)
   | Some (str, l) -> failwith str
   | None -> F_none ]
 ;

@@ -3509,14 +3509,6 @@ value make_gwsyntax ((pa, aa, ua), (fa, ca, da), sa, g_bnot) = do {
     let fevents =
       List.map
         (fun evt ->
-           let name =
-             match evt.efam_name with
-             [ Efam_Name n -> Efam_Name sa.(Adef.int_of_istr n)
-             | Efam_Marriage | Efam_NoMarriage | Efam_NoMention | Efam_Engage |
-               Efam_Divorce  | Efam_Separated | Efam_Annulation |
-               Efam_MarriageBann | Efam_MarriageContract |
-               Efam_MarriageLicense | Efam_PACS | Efam_Residence as e -> e ]
-           in
            let witl =
              List.map
                (fun (ip, wk) ->
@@ -3524,16 +3516,12 @@ value make_gwsyntax ((pa, aa, ua), (fa, ca, da), sa, g_bnot) = do {
                   (sb, sex, wk))
                (Array.to_list evt.efam_witnesses)
            in
-           (name, evt.efam_date,
-            sa.(Adef.int_of_istr evt.efam_place),
-            sa.(Adef.int_of_istr evt.efam_reason),
-            sa.(Adef.int_of_istr evt.efam_note),
-            sa.(Adef.int_of_istr evt.efam_src),
-            witl))
+           (evt, witl))
         fa.(ifam).fevents
     in
+    let (fevents, fevt_witl) = List.split fevents in
     let fam =
-      let fam = {(fa.(ifam)) with witnesses = [| |]; fevents = []} in
+      let fam = {(fa.(ifam)) with witnesses = [| |]; fevents = fevents} in
       Futil.map_family_ps (fun p -> failwith "make_gwsyntax 1")
         (fun i -> sa.(Adef.int_of_istr i)) fam
     in
@@ -3541,7 +3529,7 @@ value make_gwsyntax ((pa, aa, ua), (fa, ca, da), sa, g_bnot) = do {
       Futil.map_descend_p (string_person_of_person pa sa) da.(ifam)
     in
     rev_list.val :=
-      [Gwcomp.Family cpl s1 s2 witn fevents fam des :: rev_list.val]
+      [Gwcomp.Family cpl s1 s2 witn fevt_witl fam des :: rev_list.val]
   };
   for i = 0 to Array.length pa - 1 do {
     match pa.(i).rparents with
