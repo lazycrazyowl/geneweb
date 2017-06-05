@@ -722,7 +722,7 @@ value update_fevents_with_family gen fam =
   {(fam) with fevents = fevents}
 ;
 
-value insert_family gen co fath_sex moth_sex witl fevt_witl fo deo =
+value insert_family gen co fath_sex moth_sex witl fevt_witl pevt_witl fo deo =
   let (fath, ifath) = insert_somebody gen (Adef.father co) in
   let (moth, imoth) = insert_somebody gen (Adef.mother co) in
   let witl =
@@ -763,6 +763,39 @@ value insert_family gen co fath_sex moth_sex witl fevt_witl fo deo =
     in
     loop fo.fevents fevt_witl []
   in
+(*   let children = *)
+(*     let rec loop children pevt_witl children_witl = *)
+(*       match (children, pevt_witl) with *)
+(*       [ ([], []) -> Array.of_list (List.rev children_witl) *)
+(*       | ([c :: cl], [p :: pl]) -> *)
+(*           let pevents = *)
+(*             let rec loop pevents pevt_witl pevents_witl = *)
+(*               match (pevents, pevt_witl) with *)
+(*               [ ([], []) -> List.rev pevents_witl *)
+(*               | ([e :: el], [w :: wl]) -> *)
+(*                   let witl = *)
+(*                     List.map *)
+(*                       (fun (wit, sex, wk) -> do { *)
+(*                          let (p, ip) = insert_somebody gen wit in *)
+(*                          notice_sex gen p sex; *)
+(*                          p.m_related := [ifath :: p.m_related]; *)
+(*                          (ip, wk) }) *)
+(*                       w *)
+(*                   in *)
+(*                   let evt = {(e) with epers_witnesses = witl} in *)
+(*                   loop el wl [evt :: pevents_witl] *)
+(*               | _ -> assert False ] *)
+(*             in *)
+(*             loop fo.fevents fevt_witl [] *)
+(*           in *)
+(*           let c = {(c) with pevents = pevents} in *)
+(*           let (e, ie) = insert_person gen c in *)
+(*           let () = notice_sex gen e c.sex in *)
+(*           loop cl pl [ie :: children_witl] *)
+(*       | _ -> assert False ] *)
+(*     in *)
+(*     loop (Array.to_list deo.children) pevt_witl [] *)
+(* in *)
   let children =
     Array.map
       (fun key ->
@@ -980,8 +1013,8 @@ value insert_relations fname gen sb sex rl =
 
 value insert_syntax fname gen =
   fun
-  [ Family cpl fs ms witl fevt_witl fam des ->
-      insert_family gen cpl fs ms witl fevt_witl fam des
+  [ Family cpl fs ms witl fevt_witl pevt_witl fam des ->
+      insert_family gen cpl fs ms witl fevt_witl pevt_witl fam des
   | Notes key str -> insert_notes fname gen key str
   | Relations sb sex rl -> insert_relations fname gen sb sex rl
   | Bnotes nfname str -> insert_bnotes fname gen nfname str

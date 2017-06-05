@@ -14,6 +14,7 @@ type gw_syntax =
       gen_couple somebody and sex and sex and
         list (somebody * sex) and
         list (list (somebody * sex * witness_kind)) and
+        list (list (list (somebody * sex * witness_kind))) and
         gen_family (gen_person iper string) string and
         gen_descend (gen_person iper string)
   | Notes of key and string

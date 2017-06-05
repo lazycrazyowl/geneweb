@@ -17,6 +17,7 @@ type gw_syntax =
   [ Family of gen_couple somebody and sex and sex and
       list (somebody * sex) and
       list (list (somebody * sex * witness_kind)) and
+      list (list (list (somebody * sex * witness_kind))) and
       gen_family (gen_person iper string) string and
       gen_descend (gen_person iper string)
   | Notes of key and string
@@ -1085,7 +1086,7 @@ value read_family ic fname =
                                      epers_note = notes; epers_src = src;
                                      epers_witnesses = [| |]}
                                   in
-                                  loop_pevt [evt :: pevents] line } ]
+                                  loop_pevt [(evt, witn) :: pevents] line } ]
                           in
                           let pevents = List.rev pevents in
                           do {
@@ -1094,14 +1095,16 @@ value read_family ic fname =
                           }
                       | line -> ([], line) ]
                     in
+                    let (pevents, pevt_witl) = List.split pevents in
                     let child = {(child) with pevents = pevents} in
-                    loop_child [child :: children] line
+                    loop_child [(child, pevt_witl) :: children] line
                 | Some (str, ["end"]) -> children
                 | Some (str, _) -> failwith str
                 | _ -> failwith "eof" ]
               in
               List.rev (loop_child [] (read_line ic))
             in
+            let (cles_enfants, pevt_witl) = List.split cles_enfants in
             let fo =
               {marriage = marriage; marriage_place = marr_place;
                marriage_note = marr_note; marriage_src = marr_src;
@@ -1112,7 +1115,8 @@ value read_family ic fname =
             in
             let deo = {children = Array.of_list cles_enfants} in
             F_some
-              (Family co fath_sex moth_sex witn fevt_witl fo deo, read_line ic)
+              (Family co fath_sex moth_sex witn fevt_witl pevt_witl fo deo,
+               read_line ic)
         | line ->
             let fo =
               {marriage = marriage; marriage_place = marr_place;
@@ -1123,7 +1127,9 @@ value read_family ic fname =
                fsources = fsrc; fam_index = Adef.ifam_of_int (-1)}
             in
             let deo = {children = [| |]} in
-            F_some (Family co fath_sex moth_sex witn fevt_witl fo deo, line) ]
+            F_some
+              (Family co fath_sex moth_sex witn fevt_witl [] fo deo,
+               line) ]
       }
   | Some (str, ["notes-db"]) ->
       let notes = read_notes_db ic "end notes-db" in

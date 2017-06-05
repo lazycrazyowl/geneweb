@@ -454,7 +454,7 @@ value insert_somebody1 gen sex =
       insert_person1 gen so ]
 ;
 
-value insert_family1 gen co fath_sex moth_sex witl fevt_witl fo deo = do {
+value insert_family1 gen co fath_sex moth_sex witl fevt_witl pevt_witl fo deo = do {
   let _ifath = insert_somebody1 gen fath_sex (Adef.father co) in
   let _imoth = insert_somebody1 gen moth_sex (Adef.mother co) in
   Array.iter (fun key -> insert_person1 gen key) deo.children;
@@ -462,7 +462,13 @@ value insert_family1 gen co fath_sex moth_sex witl fevt_witl fo deo = do {
   List.iter
     (fun wl -> List.iter (fun (so, sex, _) -> insert_somebody1 gen sex so) wl)
     fevt_witl;
-  (*TODO same for pevents*)
+  (* List.iter *)
+  (*   (fun pl -> *)
+  (*      List.iter *)
+  (*        (fun wl -> *)
+  (*           List.iter (fun (so, sex, _) -> insert_somebody1 gen sex so) wl) *)
+  (*        pl) *)
+  (*   pevt_witl; *)
 };
 
 value iter_option f =
@@ -528,8 +534,8 @@ value insert_wiznotes1 gen wizid str = do {
 
 value insert_gwo_1 gen =
   fun
-  [ Family cpl fs ms witl fevt_witl fam des ->
-      insert_family1 gen cpl fs ms witl fevt_witl fam des
+  [ Family cpl fs ms witl fevt_witl pevt_witl fam des ->
+      insert_family1 gen cpl fs ms witl fevt_witl pevt_witl fam des
   | Notes key str -> ()
   | Relations sb sex rl -> insert_rparents1 gen sb sex rl
   | Bnotes nfname str -> insert_bnotes1 gen nfname str
@@ -836,7 +842,7 @@ value update_fevents_with_family fam =
   {(fam) with fevents = fevents}
 ;
 
-value insert_family2 gen co fath_sex moth_sex witl fevt_witl fo deo = do {
+value insert_family2 gen co fath_sex moth_sex witl fevt_witl pevt_witl fo deo = do {
   let ifath = get_somebody2 gen fath_sex (Adef.father co) in
   let imoth = get_somebody2 gen moth_sex (Adef.mother co) in
   let children =
@@ -951,8 +957,8 @@ value insert_rparents2 gen sb sex rl = do {
 
 value insert_gwo_2 gen =
   fun
-  [ Family cpl fs ms witl fevt_witl fam des ->
-      insert_family2 gen cpl fs ms witl fevt_witl fam des
+  [ Family cpl fs ms witl fevt_witl pevt_witl fam des ->
+      insert_family2 gen cpl fs ms witl fevt_witl pevt_witl fam des
   | Notes key str -> insert_notes2 gen key str
   | Relations sb sex rl -> insert_rparents2 gen sb sex rl
   | Bnotes nfname str -> ()

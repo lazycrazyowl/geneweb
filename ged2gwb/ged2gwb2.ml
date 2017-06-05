@@ -3528,8 +3528,10 @@ value make_gwsyntax ((pa, aa, ua), (fa, ca, da), sa, g_bnot) = do {
     let des =
       Futil.map_descend_p (string_person_of_person pa sa) da.(ifam)
     in
+    (*TODO*)
+    let pevt_witl = [] in
     rev_list.val :=
-      [Gwcomp.Family cpl s1 s2 witn fevt_witl fam des :: rev_list.val]
+      [Gwcomp.Family cpl s1 s2 witn fevt_witl pevt_witl fam des :: rev_list.val]
   };
   for i = 0 to Array.length pa - 1 do {
     match pa.(i).rparents with
